@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/govel-framework/lamb/evaluator"
+	"github.com/govel-framework/lamb/object"
 )
 
 // Init initializes the lamb module.
@@ -75,4 +78,16 @@ func Init(config map[interface{}]interface{}) error {
 	os.Setenv("GOVEL_LAMB_BASE_DIR", dir.(string))
 
 	return nil
+}
+
+func LoadLambFuntions(funcs map[string]*object.Builtin) {
+	for k, f := range funcs {
+		_, exists := evaluator.Builtins[k]
+
+		if exists {
+			panic(fmt.Sprintf("lamb: function %s already exists", k))
+		}
+
+		evaluator.Builtins[k] = f
+	}
 }

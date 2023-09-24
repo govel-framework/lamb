@@ -6,7 +6,7 @@ Lamb is a lightweight and easy-to-read template engine designed to provide a com
 
 - **Simplicity**: Lamb aims to offer a straightforward and readable syntax for template creation and rendering.
 - **Flexibility**: It supports a variety of template features, including conditionals, loops, variable interpolation, and more.
-- **Extensibility**: You can easily extend Lamb by creating custom template functions and filters.
+- **Extensibility**: You can easily extend Lamb by creating custom template functions.
 - **Performance**: Lamb is designed for efficient template rendering while keeping the codebase simple.
 
 ## License

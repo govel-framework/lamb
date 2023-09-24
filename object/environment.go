@@ -38,8 +38,6 @@ type Environment struct {
 	outer    *Environment
 	FileName string
 
-	// Vars to work with extends, section and define
-
 	InExtends bool
 	IsExtends bool
 	InSection bool

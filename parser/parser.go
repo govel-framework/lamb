@@ -73,7 +73,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBRACE, p.parseMapLiteral)
 	p.registerPrefix(token.FOR, p.parseForExpression)
 	p.registerPrefix(token.HTML, p.parseHtml)
-	p.registerPrefix(token.EOC, p.parseEndOfCode)
+	p.registerPrefix(token.EOC, p.parseHtml)
 	p.registerPrefix(token.EXTENDS, p.parseExtendsExpression)
 	p.registerPrefix(token.SECTION, p.parseSectionExpression)
 	p.registerPrefix(token.DEFINE, p.parseDefineExpression)
@@ -422,7 +422,15 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 }
 
 func (p *Parser) parseStringLiteral() ast.Expression {
-	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
+	literal := p.curToken.Literal
+
+	var closed bool
+
+	if literal[0] == literal[len(literal)-1] {
+		closed = true
+	}
+
+	return &ast.StringLiteral{Token: p.curToken, Value: literal, Closed: closed}
 }
 
 func (p *Parser) parseArrayLiteral() ast.Expression {
@@ -522,6 +530,7 @@ func (p *Parser) parseForExpression() ast.Expression {
 
 	} else {
 		expression.Value = expression.Key
+
 		expression.Key = ""
 	}
 
@@ -532,6 +541,10 @@ func (p *Parser) parseForExpression() ast.Expression {
 	p.nextToken()
 	expression.In = p.parseExpression(LOWEST)
 
+	if !p.expectPeek(token.EOC) {
+		return nil
+	}
+
 	limit := map[token.TokenType]bool{
 		token.ENDFOR: true,
 	}
@@ -539,14 +552,11 @@ func (p *Parser) parseForExpression() ast.Expression {
 	expression.Block = p.parseBlockStatement(limit)
 
 	return expression
+
 }
 
 func (p *Parser) parseHtml() ast.Expression {
-	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
-}
-
-func (p *Parser) parseEndOfCode() ast.Expression {
-	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
+	return &ast.HtmlLiteral{Token: p.curToken, Value: p.curToken.Literal}
 }
 
 func (p *Parser) parseExtendsExpression() ast.Expression {
@@ -674,7 +684,6 @@ func (p *Parser) parseIncludeExpression() ast.Expression {
 		p.nextToken()
 		p.nextToken()
 
-		// parse the map expression
 		expression.Vars = p.parseExpression(LOWEST)
 	}
 

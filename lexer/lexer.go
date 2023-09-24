@@ -147,12 +147,10 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.newToken(token.RBRACE, l.ch)
 
 	case '"':
-		tok.Type = token.STRING
-		tok.Literal = l.readString('"')
+		tok = l.readString('"')
 
 	case '\'':
-		tok.Type = token.STRING
-		tok.Literal = l.readString('\'')
+		tok = l.readString('\'')
 
 	case '[':
 		tok = l.newToken(token.LBRACKET, l.ch)
@@ -249,7 +247,11 @@ func (l *Lexer) newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch), Col: l.Column, Line: l.Line}
 }
 
-func (l *Lexer) readString(char byte) string {
+func (l *Lexer) readString(char byte) token.Token {
+	var tok token.Token
+	tok.Col = l.Column
+	tok.Line = l.Line
+
 	position := l.position + 1
 
 	for {
@@ -260,7 +262,10 @@ func (l *Lexer) readString(char byte) string {
 		}
 	}
 
-	return l.input[position:l.position]
+	tok.Type = token.STRING
+	tok.Literal = l.input[position-1 : l.position+1]
+
+	return tok
 }
 
 func (l *Lexer) readComment() {

@@ -12,10 +12,6 @@ import (
 	"github.com/govel-framework/lamb/token"
 )
 
-var (
-	fileName string
-)
-
 func Eval(node ast.Node, env *object.Environment) interface{} {
 	switch node := node.(type) {
 
@@ -90,6 +86,10 @@ func Eval(node ast.Node, env *object.Environment) interface{} {
 		return applyFunction(function, args, node.Token)
 
 	case *ast.StringLiteral:
+		if !node.Closed {
+			return newError(node.Token, "unclosed string literal")
+		}
+
 		return node.Value
 
 	case *ast.ArrayLiteral:
@@ -137,6 +137,8 @@ func Eval(node ast.Node, env *object.Environment) interface{} {
 	case *ast.IncludeStatement:
 		return evalIncludeStatement(node, env)
 
+	case *ast.HtmlLiteral:
+		return node.Value
 	}
 
 	return nil
@@ -324,20 +326,19 @@ func isTruthy(obj interface{}) bool {
 }
 
 func newError(t token.Token, format string, a ...interface{}) error {
-	err := fmt.Sprintf("%s: %d: %d: ", fileName, t.Line, t.Col)
+	err := fmt.Sprintf("%d: %d: ", t.Line, t.Col)
 
 	return fmt.Errorf(err+format, a...)
 }
 
 func evalProgram(program *ast.Program, env *object.Environment) interface{} {
 	var result string
-	fileName = env.FileName
 
 	for _, statement := range program.Statements {
 		r := Eval(statement, env)
 
 		if isError(r) {
-			return r
+			return fmt.Sprintf("%s: %v", env.FileName, r)
 		}
 
 		if r != nil {

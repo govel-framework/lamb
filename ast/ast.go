@@ -229,8 +229,9 @@ func (ce *CallExpression) String() string {
 }
 
 type StringLiteral struct {
-	Token token.Token
-	Value string
+	Token  token.Token
+	Value  string
+	Closed bool // whether the string is closed
 }
 
 func (sl *StringLiteral) expressionNode()      {}
@@ -414,3 +415,12 @@ func (is *IncludeStatement) String() string {
 
 	return out.String()
 }
+
+type HtmlLiteral struct {
+	Token token.Token
+	Value string
+}
+
+func (hl *HtmlLiteral) expressionNode()      {}
+func (hl *HtmlLiteral) TokenLiteral() string { return hl.Token.Literal }
+func (hl *HtmlLiteral) String() string       { return hl.Token.Literal }

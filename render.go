@@ -18,8 +18,7 @@ func Render(c *govel.Context, file string, vars map[string]interface{}) {
 			session, err := govel.Store.Get(c.Request, cookie.Name)
 
 			if err != nil {
-				// it is not a valid session
-				continue
+				continue // it is not a valid session
 			}
 
 			sessions[cookie.Name] = session.Values
@@ -38,4 +37,5 @@ func Render(c *govel.Context, file string, vars map[string]interface{}) {
 	if err != nil {
 		panic(err.Error())
 	}
+
 }
